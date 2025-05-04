@@ -24,6 +24,9 @@ export class Certificate {
   @Column({ nullable: true })
   filePath: string;
 
+  @Column({ type: 'bytea', nullable: true }) // <-- Store PDF as binary
+  pdfBuffer: Buffer;
+
   @ManyToOne(() => User, (user) => user.certificates)
   student: User;
 }

@@ -107,14 +107,12 @@ export class CertificatesService {
     const fileBuffer = Buffer.from(pdfBytes);
 
     const filename = `certificate-${user.fullName.replace(/\s/g, '-')}-${Date.now()}.pdf`;
-    const filePath = join(process.cwd(), 'src/storage/certificates', filename);
-    fs.writeFileSync(filePath, fileBuffer);
 
     const cert = this.certRepo.create({
       certificateNumber,
       courseName,
       student: user,
-      filePath,
+      pdfBuffer: fileBuffer,
     });
     await this.certRepo.save(cert);
 
@@ -133,6 +131,21 @@ export class CertificatesService {
       courseName: cert.courseName,
       issuedAt: cert.issuedAt,
       certificateNumber: cert.certificateNumber,
+    };
+  }
+  async getCertificateFile(
+    certificateNumber: string,
+  ): Promise<{ buffer: Buffer; filename: string } | null> {
+    const cert = await this.certRepo.findOne({
+      where: { certificateNumber },
+      relations: ['student'],
+    });
+
+    if (!cert || !cert.pdfBuffer) return null;
+
+    return {
+      buffer: cert.pdfBuffer,
+      filename: `${cert.student.fullName.replace(/\s/g, '_')}-certificate.pdf`,
     };
   }
 }
