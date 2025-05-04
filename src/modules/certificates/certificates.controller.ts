@@ -1,10 +1,12 @@
 import {
   Controller,
   Get,
+  Post,
   Query,
   Res,
   NotFoundException,
   Param,
+  Body,
 } from '@nestjs/common';
 import { CertificatesService } from './certificates.service';
 import { Response } from 'express';
@@ -13,24 +15,35 @@ import { Response } from 'express';
 export class CertificatesController {
   constructor(private readonly certificatesService: CertificatesService) {}
 
-  @Get('generate')
+  @Post('generate')
   async generate(
-    @Query('userId') userId: string,
-    @Query('course') course: string,
+    @Body('name') name: string,
+    @Body('courseName') courseName: string,
     @Res() res: Response,
   ) {
-    const pdfBuffer = await this.certificatesService.generateCertificate(
-      userId,
-      course,
-    );
+    try {
+      const pdfBuffer =
+        await this.certificatesService.generateCertificateByName(
+          name,
+          courseName,
+        );
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${userId}-certificate.pdf"`,
-    });
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${name.replace(
+          /\s/g,
+          '-',
+        )}-certificate.pdf"`,
+      });
 
-    res.send(pdfBuffer);
+      res.send(pdfBuffer);
+    } catch (error) {
+      throw new NotFoundException(
+        error.message || 'Error generating certificate',
+      );
+    }
   }
+
   @Get('verify')
   async verify(@Query('code') certificateNumber: string) {
     const result =
@@ -40,10 +53,13 @@ export class CertificatesController {
     }
     return result;
   }
+
   @Get('download/:certNo')
   async download(@Param('certNo') certNo: string, @Res() res: Response) {
     const file = await this.certificatesService.getCertificateFile(certNo);
-    if (!file) throw new NotFoundException('Certificate not found');
+    if (!file) {
+      throw new NotFoundException('Certificate not found');
+    }
 
     res.set({
       'Content-Type': 'application/pdf',

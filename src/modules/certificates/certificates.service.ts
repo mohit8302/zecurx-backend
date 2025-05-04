@@ -148,4 +148,13 @@ export class CertificatesService {
       filename: `${cert.student.fullName.replace(/\s/g, '_')}-certificate.pdf`,
     };
   }
+  async generateCertificateByName(
+    name: string,
+    courseName: string,
+  ): Promise<Buffer> {
+    const user = await this.userRepo.findOne({ where: { fullName: name } });
+    if (!user) throw new Error('User not found');
+
+    return this.generateCertificate(user.id, courseName);
+  }
 }
