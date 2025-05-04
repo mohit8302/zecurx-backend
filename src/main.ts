@@ -6,7 +6,10 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: [
+      'http://localhost:4200', // Local development
+      'https://zecurex-frontend.vercel.app', // Deployed frontend
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
