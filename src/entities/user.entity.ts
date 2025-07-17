@@ -9,6 +9,7 @@ import {
 import { UserRole } from '../shared/enums/role.enum';
 import { Exclude } from 'class-transformer';
 import { Certificate } from './certificate.entity';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -26,6 +27,12 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
+
+  @Column({ default: true })
+  is_active: boolean;
+
+  @Column({ nullable: true, length: 15 })
+  mobile: string;
 
   @CreateDateColumn()
   createdAt: Date;

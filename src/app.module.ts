@@ -19,12 +19,18 @@ import { WorkshopsModule } from './modules/workshops/workshops.module';
 
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+      username: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASS || 'tiger',
+      database: process.env.DB_NAME || 'zecurx',
       autoLoadEntities: true,
-      synchronize: true,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      synchronize: false,
+      ssl: process.env.DATABASE_URL
+        ? {
+            rejectUnauthorized: false,
+          }
+        : false,
     }),
 
     AuthModule,
